@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Twilio Playground</title>
+    <style>
+      * {
+        font-family: sans-serif;
+      }
+    </style>
+    <script src="//sdk.twilio.com/js/video/releases/2.17.1/twilio-video.min.js"></script>
+  </head>
+  <body>
+    <h3> Twilio playground </h3>
+    <p>
+      Visit with `?roomName=foo` to connect to room "foo" otherwise you will
+      connect to generic room "test".
+    </p>
+    <div id="remote-media-div"></div>
+  </body>
+
+
+  <script>
+    'use strict'
+
+    ;(async () => {
+      // Establish `idUser` and `roomName`
+      const params = (new URL(document.location)).searchParams
+      const roomName = params.get('roomName') || 'test'
+      const idUser = (Math.random() + 1).toString(36).substring(7)
+
+      // Fetch token
+      const response = await fetch('/token?' + new URLSearchParams({
+        idUser,
+        roomName
+      }))
+      const token = await response.json()
+
+      const localTracks = await Twilio.Video.createLocalTracks({
+        audio: true,
+        video: { width: 640 }
+      })
+
+      const room = await Twilio.Video.connect(token, {
+        name: 'test',
+        tracks: localTracks
+      })
+
+      // Handle Connected Participants
+
+      // Log your Client's LocalParticipant in the Room
+      const localParticipant = room.localParticipant
+      console.log(`Connected to the Room "${roomName}" as LocalParticipant "${localParticipant.identity}"`)
+
+      // Log any Participants already connected to the Room
+      room.participants.forEach(participant => {
+        console.log(`Participant "${participant.identity}" is connected to the Room`)
+      })
+
+      // Log new Participants as they connect to the Room
+      room.once('participantConnected', participant => {
+        console.log(`Participant "${participant.identity}" has connected to the Room`)
+      })
+
+      // Log Participants as they disconnect from the Room
+      room.once('participantDisconnected', participant => {
+        console.log(`Participant "${participant.identity}" has disconnected from the Room`)
+      })
+
+      // Handle Participant Connection Events
+
+      room.on('participantConnected', participant => {
+        console.log(`Participant connected: ${participant.identity}`)
+      })
+
+      room.on('participantDisconnected', participant => {
+        console.log(`Participant disconnected: ${participant.identity}`)
+      })
+
+      // Display a Remote Participant's Video
+
+      // Attach the Participant's Media to a <div> element.
+      room.on('participantConnected', participant => {
+        console.log(`Participant "${participant.identity}" connected`)
+
+        participant.tracks.forEach(publication => {
+          if (publication.isSubscribed) {
+            const track = publication.track
+            document.getElementById('remote-media-div').appendChild(track.attach())
+          }
+        })
+
+        participant.on('trackSubscribed', track => {
+          document.getElementById('remote-media-div').appendChild(track.attach())
+        })
+      })
+
+      // Display RemoteParticipants that are already in Room
+      room.participants.forEach(participant => {
+        participant.tracks.forEach(publication => {
+          if (publication.track) {
+            document.getElementById('remote-media-div').appendChild(publication.track.attach())
+          }
+        })
+
+       participant.on('trackSubscribed', track => {
+          document.getElementById('remote-media-div').appendChild(track.attach())
+        })
+      })
+    })()
+  </script>
+</html>
