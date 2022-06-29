@@ -4,18 +4,17 @@ const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const Twilio = require('twilio')
-const AccessToken = Twilio.jwt.AccessToken
 const validators = require('./validators')
 
-const twilioAccountSid = process.env.twilioAccountSid
-const twilioApiKey = process.env.twilioApiKey
-const twilioApiSecret = process.env.twilioApiSecret
+const accountSid = process.env.twilioAccountSid
+const apiKey = process.env.twilioApiKey
+const apiSecret = process.env.twilioApiSecret
+
+const AccessToken = Twilio.jwt.AccessToken
+const VideoGrant = AccessToken.VideoGrant
 
 const app = express()
-const VideoGrant = AccessToken.VideoGrant
-const twilioClient = Twilio(twilioApiKey, twilioApiSecret, {
-  accountSid: twilioAccountSid
-})
+const twilioClient = Twilio(apiKey, apiSecret, { accountSid })
 
 app.set('port', (process.env.PORT || 5008))
 app.use(bodyParser.json())
@@ -56,14 +55,9 @@ app.get(
   async (req, res, next) => {
     try {
       const videoGrant = new VideoGrant({ room: req.query.roomName })
-      const token = new AccessToken(
-        twilioAccountSid,
-        twilioApiKey,
-        twilioApiSecret,
-        {
-          identity: req.query.idUser
-        }
-      )
+      const token = new AccessToken(accountSid, apiKey, apiSecret, {
+        identity: req.query.idUser
+      })
 
       token.addGrant(videoGrant)
 

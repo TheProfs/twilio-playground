@@ -7,28 +7,58 @@
       * {
         font-family: sans-serif;
       }
+
+      #room-controls > div {
+        padding: 12px 8px;
+      }
     </style>
     <script src="//sdk.twilio.com/js/video/releases/2.17.1/twilio-video.min.js"></script>
   </head>
   <body>
     <h3> Twilio playground </h3>
-    <p>
-      Visit with `?roomName=foo` to connect to room "foo" otherwise you will
-      connect to generic room "test".
-    </p>
+
+    <div id="room-controls">
+      <div>
+        <label for="roomNameInput">Room name:</label>
+        <input
+          id="roomNameInput"
+          value="Test"
+          type="text"
+          name="name"
+          minlength="4"
+          maxlength="20"
+          size="10"
+          required>
+      </div>
+
+      <div>
+        <label for="roomTypeSelect">Room type:</label>
+        <select id="roomTypeSelect" name="room-types">
+          <option value="go">Go</option>
+          <option value="peer-to-peer">Peer To Peer</option>
+          <option value="group-small">Group Small</option>
+          <option value="group">Group</option>
+        </select>
+      </div>
+
+      <div>
+        <button id="connectBtn" type="button">Connect</button>
+      </div>
+    </div>
+
     <div id="remote-media-div"></div>
   </body>
 
 
   <script>
-    'use strict'
+  'use strict'
 
-    ;(async () => {
-      // Establish initials
-      const params = (new URL(document.location)).searchParams
-      const roomName = params.get('roomName') || 'test'
-      const roomType = params.get('roomType') || 'group'
+  document.querySelector('#connectBtn').addEventListener('click', async () => {
+    console.log('Connecting...')
+
       const idUser = (Math.random() + 1).toString(36).substring(7)
+      const roomName = document.querySelector('#roomNameInput').value
+      const roomType = document.querySelector('#roomTypeSelect').value
 
       // Fetch token
       const token = await fetch('/token?' + new URLSearchParams({
@@ -122,6 +152,6 @@
           document.getElementById('remote-media-div').appendChild(track.attach())
         })
       })
-    })()
+    })
   </script>
 </html>
