@@ -1,5 +1,7 @@
 # twilio-playground
 
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 [Twilio][twilio] calls playground
 
 ## Install
@@ -37,6 +39,13 @@ then visit http://localhost:5008
  - Client sends a server request to create an *Access Token*, granting access
    to that *Room*.
  - Client connects to the *Room* using the *Access Token*.
+
+## Contributing
+
+```bash
+# Lint before commiting
+$ npm run lint
+```
 
 ## Authors
 

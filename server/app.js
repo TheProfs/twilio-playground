@@ -32,7 +32,7 @@ app.post(
       try {
         const room = await twilioClient.video.rooms(req.body.roomName).fetch()
 
-        res.json(await twilioClient.video.rooms(req.body.roomName).fetch())
+        res.json(room)
       } catch (err) {
         if (err.status === 404) {
           const room = await twilioClient.video.rooms.create({
@@ -48,7 +48,7 @@ app.post(
     } catch (err) {
       next(err)
     }
-})
+  })
 
 app.get(
   '/token',
@@ -71,7 +71,7 @@ app.get(
     } catch (err) {
       next(err)
     }
-})
+  })
 
 app.use((err, req, res, next) => {
   console.error(err)

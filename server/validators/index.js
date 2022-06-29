@@ -5,7 +5,7 @@ const createHttpError = require('http-errors')
 
 module.exports = {
   validate: (validator) => {
-    return async function(req, res, next) {
+    return async function (req, res, next) {
       const prop = req.method === 'GET' ? 'query' : 'body'
 
       try {
@@ -13,13 +13,14 @@ module.exports = {
         req[prop] = validated
         next()
       } catch (err) {
-        if (err.isJoi)
+        if (err.isJoi) {
           return next(createHttpError(422, {
             message: err.message,
             path: req.path,
             method: req.method,
-            prop: prop
+            prop
           }))
+        }
 
         next(createHttpError(500))
       }
@@ -37,7 +38,7 @@ module.exports = {
     post: Joi.object({
       roomName: Joi.string().required(),
       roomType: Joi.string()
-        .valid('go','peer-to-peer', 'group-small', 'group')
+        .valid('go', 'peer-to-peer', 'group-small', 'group')
         .required()
     })
   }
