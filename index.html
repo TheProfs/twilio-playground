@@ -24,25 +24,38 @@
     'use strict'
 
     ;(async () => {
-      // Establish `idUser` and `roomName`
+      // Establish initials
       const params = (new URL(document.location)).searchParams
       const roomName = params.get('roomName') || 'test'
+      const roomType = params.get('roomType') || 'group'
       const idUser = (Math.random() + 1).toString(36).substring(7)
 
       // Fetch token
-      const response = await fetch('/token?' + new URLSearchParams({
+      const token = await fetch('/token?' + new URLSearchParams({
         idUser,
         roomName
       }))
-      const token = await response.json()
+      .then(res => res.json())
+
+      // Create room if not exists
+      // `roomType` can be one of 'go', 'peer-to-peer', 'group-small', 'group'
+      window.createdRoom = await fetch('/room', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ roomName, roomType })
+      })
+      .then(res => res.json())
 
       const localTracks = await Twilio.Video.createLocalTracks({
         audio: true,
         video: { width: 640 }
       })
 
-      const room = await Twilio.Video.connect(token, {
-        name: 'test',
+      window.room = await Twilio.Video.connect(token, {
+        name: roomName,
         tracks: localTracks
       })
 
@@ -50,7 +63,9 @@
 
       // Log your Client's LocalParticipant in the Room
       const localParticipant = room.localParticipant
-      console.log(`Connected to the Room "${roomName}" as LocalParticipant "${localParticipant.identity}"`)
+      console.log(
+        `Connected to the Room "${createdRoom.uniqueName}" of type "${createdRoom.type}" as LocalParticipant "${localParticipant.identity}"`
+      )
 
       // Log any Participants already connected to the Room
       room.participants.forEach(participant => {

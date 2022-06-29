@@ -12,7 +12,7 @@ $ npm install
 
 ### Set Twilio credentials as environmental variables
 
-You can obtain the credentials from the [Twilio dashboard][twilio-console]
+You can obtain credentials from the [Twilio dashboard][twilio-console]
 
 ```bash
 $ export TWILIO_ACCOUNT_SID=<account-SID> # starts with AC
@@ -30,10 +30,17 @@ $ npm run start-dev
 
 then visit http://localhost:5008
 
+## Process
+
+ - Client sends a request to create a *Room*. If the *Room* does not exist, it
+   is created.
+ - Client sends a server request to create an *Access Token*, granting access
+   to that *Room*.
+ - Client connects to the *Room* using the *Access Token*.
+
 ## Authors
 
 - [@nicholaswmin][nicholaswmin]
-
 
 [twilio]: https://twilio.com
 [twilio-console]: https://console.twilio.com/
