@@ -8,16 +8,45 @@
         font-family: sans-serif;
       }
 
-      #room-controls > div {
-        padding: 12px 8px;
+      #connectedLabels,
+      #roomControls {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        background: #fafafa;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+        z-index: 99;
+        padding: 8px 12px;
+      }
+
+      #roomControls > div {
+        padding: 12px 0;
+      }
+
+      #connectedLabels {
+        display: none;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      video {
+        width: 250px;
       }
     </style>
     <script src="//sdk.twilio.com/js/video/releases/2.17.1/twilio-video.min.js"></script>
   </head>
   <body>
-    <h3> Twilio playground </h3>
+    <div id="connectedLabels">
+      <h4> Connected </h4>
+      <h5 id="roomNameLabel"></h5>
+      <h5 id="roomTypeLabel"></h5>
+      <h5 id="roomShouldRecordLabel"></h5>
+    </div>
 
-    <div id="room-controls">
+    <div id="roomControls">
       <div>
         <label for="roomNameInput">Room name:</label>
         <input
@@ -42,23 +71,48 @@
       </div>
 
       <div>
+        <input id="recordCheckbox" type="checkbox" name="recordCheckbox">
+        <label for="recordCheckbox">Record</label>
+      </div>
+
+      <div>
         <button id="connectBtn" type="button">Connect</button>
       </div>
     </div>
 
+    <div id="local-media-div"></div>
     <div id="remote-media-div"></div>
   </body>
 
 
   <script>
-  'use strict'
+    'use strict'
 
-  document.querySelector('#connectBtn').addEventListener('click', async () => {
-    console.log('Connecting...')
+    const handleConnectAttempt = () => {
+      document.querySelector('#connectBtn').innerText = 'Connecting...'
+    }
+
+    const handleConnectSuccess = ({ roomName, roomType, roomShouldRecord }) => {
+      document.querySelector('#roomControls').style.display = 'none'
+      document.querySelector('#connectedLabels').style.display = 'block'
+      document.querySelector('#roomNameLabel').innerText = `Room: ${roomName}`
+      document.querySelector('#roomTypeLabel').innerText = `Type: ${roomType}`
+      document.querySelector('#roomShouldRecordLabel')
+        .innerText = `Recording: ${roomShouldRecord ? 'yes' : 'false'}`
+    }
+
+    Twilio.Video.createLocalVideoTrack().then(track => {
+      const localMediaContainer = document.getElementById('local-media-div')
+      localMediaContainer.appendChild(track.attach())
+    })
+
+    document.querySelector('#connectBtn').addEventListener('click', async () => {
+      console.log('Connecting...')
 
       const idUser = (Math.random() + 1).toString(36).substring(7)
       const roomName = document.querySelector('#roomNameInput').value
       const roomType = document.querySelector('#roomTypeSelect').value
+      const roomShouldRecord = document.querySelector('#recordCheckbox').checked
 
       // Fetch token
       const token = await fetch('/token?' + new URLSearchParams({
@@ -75,7 +129,7 @@
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ roomName, roomType })
+        body: JSON.stringify({ roomName, roomType, roomShouldRecord })
       })
       .then(res => res.json())
 
@@ -84,10 +138,14 @@
         video: { width: 640 }
       })
 
+      handleConnectAttempt()
+
       window.room = await Twilio.Video.connect(token, {
         name: roomName,
         tracks: localTracks
       })
+
+      handleConnectSuccess({ roomName, roomType, roomShouldRecord })
 
       // Handle Connected Participants
 
@@ -100,16 +158,6 @@
       // Log any Participants already connected to the Room
       room.participants.forEach(participant => {
         console.log(`Participant "${participant.identity}" is connected to the Room`)
-      })
-
-      // Log new Participants as they connect to the Room
-      room.once('participantConnected', participant => {
-        console.log(`Participant "${participant.identity}" has connected to the Room`)
-      })
-
-      // Log Participants as they disconnect from the Room
-      room.once('participantDisconnected', participant => {
-        console.log(`Participant "${participant.identity}" has disconnected from the Room`)
       })
 
       // Handle Participant Connection Events
@@ -133,6 +181,12 @@
             const track = publication.track
             document.getElementById('remote-media-div').appendChild(track.attach())
           }
+
+          // Make sure we detach the track and remove the <video> if this
+          // RemoteParticipant disconnects.
+          publication.on('unsubscribed', track => {
+            track.detach().forEach(element => element.remove())
+          })
         })
 
         participant.on('trackSubscribed', track => {
@@ -151,6 +205,12 @@
        participant.on('trackSubscribed', track => {
           document.getElementById('remote-media-div').appendChild(track.attach())
         })
+      })
+
+      // Handle browser/tab close
+      // https://www.twilio.com/docs/video/reconnection-states-and-events#handling-browser-session-termination-and-page-navigation
+      window.addEventListener('beforeunload', () => {
+        room.disconnect()
       })
     })
   </script>

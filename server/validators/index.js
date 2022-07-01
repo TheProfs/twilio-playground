@@ -39,7 +39,8 @@ module.exports = {
       roomName: Joi.string().required(),
       roomType: Joi.string()
         .valid('go', 'peer-to-peer', 'group-small', 'group')
-        .required()
+        .required(),
+      roomShouldRecord: Joi.boolean().required()
     })
   }
 }

@@ -36,7 +36,8 @@ app.post(
         if (err.status === 404) {
           const room = await twilioClient.video.rooms.create({
             type: req.body.roomType,
-            uniqueName: req.body.roomName
+            uniqueName: req.body.roomName,
+            recordParticipantsOnConnect: req.body.roomShouldRecord
           })
 
           return res.json(room)
