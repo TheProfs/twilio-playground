@@ -8,3 +8,5 @@
 - [ ] Counting call times.
 - [ ] Room generation and token generation can happen in the same endpoint.
 - [ ] Compositions are super expensive, can they happen on client?
+- [ ] Does Twilio suffer from the same issues with Bluetooth Headsets unable
+      to mute/unmute themselves?

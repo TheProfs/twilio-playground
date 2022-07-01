@@ -6,9 +6,9 @@ const bodyParser = require('body-parser')
 const Twilio = require('twilio')
 const validators = require('./validators')
 
-const accountSid = process.env.twilioAccountSid
-const apiKey = process.env.twilioApiKey
-const apiSecret = process.env.twilioApiSecret
+const accountSid = process.env.TWILIO_ACCOUNT_SID
+const apiKey = process.env.TWILIO_API_KEY
+const apiSecret = process.env.TWILIO_API_SECRET
 
 const AccessToken = Twilio.jwt.AccessToken
 const VideoGrant = AccessToken.VideoGrant
