@@ -50,6 +50,10 @@ then visit http://localhost:5008
 
  - Client sends a request to create a *Room*. If the *Room* does not exist, it
    is created.
+   - The Room is created with a specified [webhook URL][twilio-webhooks] which
+   sends Twilio events to [bp-webhook-broadcast][bp-webhook-broadcast] which in
+   turn broadcasts those events to a [RabbitMQ][cloud-amqp] queue.
+   This app listens for the *Room* events on that queue.
  - Client sends a server request to create an *Access Token*, granting access
    to that *Room*.
  - Client connects to the *Room* using the *Access Token*.
@@ -68,3 +72,6 @@ $ npm run lint
 [twilio]: https://twilio.com
 [twilio-console]: https://console.twilio.com/
 [nicholaswmin]: https://github.com/nicholaswmin
+[twilio-webhooks]: https://www.twilio.com/docs/video/api/status-callbacks#rooms-callbacks
+[bp-webhook-broadcast]: https://github.com/TheProfs/bp-webhook-broadcast
+[cloud-amqp]: https://www.cloudamqp.com/
