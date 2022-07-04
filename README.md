@@ -22,7 +22,8 @@ $ export TWILIO_API_SECRET=<api-secret>
 
 # Webhook URL for receiving Room status events
 $ export TWILIO_STATUS_CALLBACK_URL=https://bp-webhook-broadcast.herokuapp.com/staging/twilio/room/event
-
+# RabbitMQ queue name for Twilio Room events
+$ export TWILIO_ROOM_EVENT_QUEUE=bp-webhook-broadcast.development.twilio.room
 # Cloud AMQP URL (https://www.cloudamqp.com/)
 $ export AMQP_URL=<cloud-amqp-url>
 ```

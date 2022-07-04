@@ -22,7 +22,7 @@ app.use(bodyParser.json())
 // https://www.twilio.com/docs/video/api/status-callbacks#rooms-callback-events
 
 ;['room-created', 'recording-started', 'recording-completed'].forEach(event => {
-  bus.listen(`bp-webhook-broadcast.staging.twilio.room.${event}`, event => {
+  bus.listen(`${process.env.TWILIO_ROOM_EVENT_QUEUE}.${event}`, event => {
     console.log(event)
   })
 })
@@ -39,7 +39,7 @@ app.post(
       try {
         const room = await twilioClient.video.rooms(req.body.roomName).fetch()
 
-        res.json(room)
+        return res.json(room)
       } catch (err) {
         if (err.status === 404) {
           const room = await twilioClient.video.rooms.create({
