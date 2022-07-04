@@ -12,14 +12,28 @@ Clone this repo, `cd` into it and then:
 $ npm install
 ```
 
-### Set Twilio credentials as environmental variables
-
-You can obtain credentials from the [Twilio dashboard][twilio-console]
+### Set required environmental variables
 
 ```bash
+# Twilio API credentials (https://console.twilio.com/)
 $ export TWILIO_ACCOUNT_SID=<account-SID> # starts with AC
 $ export TWILIO_API_KEY=<api-key-name> # starts with SK
 $ export TWILIO_API_SECRET=<api-secret>
+
+# Webhook URL for receiving Room status events
+$ export TWILIO_STATUS_CALLBACK_URL=https://bp-webhook-broadcast.herokuapp.com/staging/twilio/room/event
+
+# Cloud AMQP URL (https://www.cloudamqp.com/)
+$ export AMQP_URL=<cloud_amqp_url>
+```
+
+You can permanently set these variables in `~/.zshenv`:
+
+```bash
+$ touch ~/.zshenv
+$ nano ~/.zshenv
+# type the exports in the file, save and then:
+$ source ~/.zshenv
 ```
 
 ## Run

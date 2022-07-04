@@ -10,3 +10,5 @@
 - [ ] Compositions are super expensive, can they happen on client?
 - [ ] Does Twilio suffer from the same issues with Bluetooth Headsets unable
       to mute/unmute themselves?
+- [ ] When should we perform recording composition? After `room-ended` event?
+      The recordings might not have completed. Ask the team.
