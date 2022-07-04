@@ -9,6 +9,6 @@
 
 ## Production
 
-- [ ] Create production microservice to handle recordings, using job queues.
-      and serverless lambdas.
+- [ ] Create production microservice to handle recordings, using job queues and
+      serverless lambdas.
 - [ ] Swap Tokbox SDK with Twilio SDK in Bitpaper `rtc-box` component.
