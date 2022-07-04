@@ -24,7 +24,7 @@ $ export TWILIO_API_SECRET=<api-secret>
 $ export TWILIO_STATUS_CALLBACK_URL=https://bp-webhook-broadcast.herokuapp.com/staging/twilio/room/event
 
 # Cloud AMQP URL (https://www.cloudamqp.com/)
-$ export AMQP_URL=<cloud_amqp_url>
+$ export AMQP_URL=<cloud-amqp-url>
 ```
 
 You can permanently set these variables in `~/.zshenv`:
