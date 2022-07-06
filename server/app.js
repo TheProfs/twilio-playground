@@ -3,11 +3,13 @@
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
+const Redis = require('redis')
 const Twilio = require('twilio')
 const servicebus = require('servicebus')
 const validators = require('./validators')
 
 const app = express()
+const redis = Redis.createClient()
 const twilioClient = Twilio(
   process.env.TWILIO_API_KEY,
   process.env.TWILIO_API_SECRET, {
@@ -18,13 +20,47 @@ const bus = servicebus.bus({ url: process.env.AMQP_URL })
 app.set('port', (process.env.PORT || 5008))
 app.use(bodyParser.json())
 
-// List of event names:
-// https://www.twilio.com/docs/video/api/status-callbacks#rooms-callback-events
+// @NOTE
+// - List of event names:
+//  https://www.twilio.com/docs/video/api/status-callbacks#rooms-callback-events
+// @TODO
+// - [ ] These event listeners belong in a separate service, for recordings.
+// = [ ] Implement `recording-failed` event listener.
+bus.listen(
+  `${process.env.TWILIO_ROOM_EVENT_QUEUE}.recording-started`,
+  async event => {
 
-;['room-created', 'recording-started', 'recording-completed'].forEach(event => {
-  bus.listen(`${process.env.TWILIO_ROOM_EVENT_QUEUE}.${event}`, event => {
-    console.log(event)
-  })
+  try {
+    await redis.lPush(`${event.RoomSid}-tracks`, JSON.stringify(event))
+    await redis.incr(`${event.RoomSid}-open-recordings`)
+  } catch (err) {
+    console.error(err)
+  }
+})
+
+// @REVIEW
+// - Is this truly multi-dyno safe?
+//   It should be because it doesn't matter on which dyno the last event
+//   arrives. `redis.decr()` is an atomic operation that *also returns* the
+//   decremented value.
+bus.listen(
+  `${process.env.TWILIO_ROOM_EVENT_QUEUE}.recording-completed`,
+  async event => {
+
+  try {
+    const openRecordings = await redis.decr(`${event.RoomSid}-open-recordings`)
+
+    if (openRecordings === 0) {
+      const tracks = await redis.lRange(`${event.RoomSid}-tracks`, 0, -1)
+        .then(res => res ? res.map(val => JSON.parse(val)) : [])
+
+      await redis.del(`${event.RoomSid}-tracks`)
+
+      console.log('Call end, tracks:', tracks.map(track => track.RecordingSid))
+    }
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 app.get('/', async (req, res, next) => {
@@ -91,6 +127,8 @@ app.use((err, req, res, next) => {
   })
 })
 
-app.listen(app.get('port'), () => {
+await redis.connect()
+
+app.listen(app.get('port'), async () => {
   console.log(`Listening at http://localhost:${app.get('port')}`)
 })
