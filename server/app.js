@@ -56,6 +56,7 @@ bus.listen(
 
       await redis.del(`${event.RoomSid}-tracks`)
 
+      console.log(tracks)
       console.log('Call end, tracks:', tracks.map(track => track.RecordingSid))
     }
   } catch (err) {
@@ -127,8 +128,10 @@ app.use((err, req, res, next) => {
   })
 })
 
-await redis.connect()
+;(async () => {
+  await redis.connect()
 
-app.listen(app.get('port'), async () => {
-  console.log(`Listening at http://localhost:${app.get('port')}`)
-})
+  app.listen(app.get('port'), async () => {
+    console.log(`Listening at http://localhost:${app.get('port')}`)
+  })
+})()
