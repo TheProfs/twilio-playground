@@ -140,7 +140,7 @@
 
       handleConnectAttempt()
 
-      const room = await Twilio.Video.connect(token, {
+      window.room = await Twilio.Video.connect(token, {
         name: createdRoom.uniqueName,
         tracks: []
       })
