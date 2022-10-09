@@ -101,11 +101,6 @@
         .innerText = `Recording: ${roomShouldRecord ? 'yes' : 'false'}`
     }
 
-    Twilio.Video.createLocalVideoTrack().then(track => {
-      const localMediaContainer = document.getElementById('local-media-div')
-      localMediaContainer.appendChild(track.attach())
-    })
-
     document.querySelector('#connectBtn').addEventListener('click', async () => {
       console.log('Connecting...')
 
