@@ -140,78 +140,12 @@
 
       handleConnectAttempt()
 
-      window.room = await Twilio.Video.connect(token, {
-        name: roomName,
-        tracks: localTracks
+      const room = await Twilio.Video.connect(token, {
+        name: createdRoom.uniqueName,
+        tracks: []
       })
 
       handleConnectSuccess({ roomName, roomType, roomShouldRecord })
-
-      // Handle Connected Participants
-
-      // Log your Client's LocalParticipant in the Room
-      const localParticipant = room.localParticipant
-      console.log(
-        `Connected to the Room "${createdRoom.uniqueName}" of type "${createdRoom.type}" as LocalParticipant "${localParticipant.identity}"`
-      )
-
-      // Log any Participants already connected to the Room
-      room.participants.forEach(participant => {
-        console.log(`Participant "${participant.identity}" is connected to the Room`)
-      })
-
-      // Handle Participant Connection Events
-
-      room.on('participantConnected', participant => {
-        console.log(`Participant connected: ${participant.identity}`)
-      })
-
-      room.on('participantDisconnected', participant => {
-        console.log(`Participant disconnected: ${participant.identity}`)
-      })
-
-      // Display a Remote Participant's Video
-
-      // Attach the Participant's Media to a <div> element.
-      room.on('participantConnected', participant => {
-        console.log(`Participant "${participant.identity}" connected`)
-
-        participant.tracks.forEach(publication => {
-          if (publication.isSubscribed) {
-            const track = publication.track
-            document.getElementById('remote-media-div').appendChild(track.attach())
-          }
-
-          // Make sure we detach the track and remove the <video> if this
-          // RemoteParticipant disconnects.
-          publication.on('unsubscribed', track => {
-            track.detach().forEach(element => element.remove())
-          })
-        })
-
-        participant.on('trackSubscribed', track => {
-          document.getElementById('remote-media-div').appendChild(track.attach())
-        })
-      })
-
-      // Display RemoteParticipants that are already in Room
-      room.participants.forEach(participant => {
-        participant.tracks.forEach(publication => {
-          if (publication.track) {
-            document.getElementById('remote-media-div').appendChild(publication.track.attach())
-          }
-        })
-
-       participant.on('trackSubscribed', track => {
-          document.getElementById('remote-media-div').appendChild(track.attach())
-        })
-      })
-
-      // Handle browser/tab close
-      // https://www.twilio.com/docs/video/reconnection-states-and-events#handling-browser-session-termination-and-page-navigation
-      window.addEventListener('beforeunload', () => {
-        room.disconnect()
-      })
     })
   </script>
 </html>
